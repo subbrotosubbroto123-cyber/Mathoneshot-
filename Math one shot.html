@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Math Oneshot</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #3b82f6;
+            --primary-hover: #2563eb;
+            --bg-dark: #0f172a;
+            --bg-panel: #1e293b;
+            --bg-hover: #334155;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --border: #334155;
+            --success: #22c55e;
+            --font-main: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: var(--font-main);
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        /* --- Header --- */
+        header {
+            height: 60px;
+            background-color: var(--bg-panel);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 20px;
+            z-index: 10;
+        }
+
+        .logo-area { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 1.2rem; }
+        .logo-icon { color: var(--primary); }
+
+        .progress-container { display: flex; align-items: center; gap: 15px; }
+        .progress-text { font-size: 0.9rem; color: var(--text-muted); }
+        
+        .progress-bar-bg {
+            width: 150px;
+            height: 8px;
+            background-color: var(--bg-dark);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        .progress-bar-fill {
+            height: 100%;
+            background-color: var(--success);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        /* --- Main Layout --- */
+        .main-container { display: flex; flex: 1; overflow: hidden; }
+
+        /* --- Content Area (Left) --- */
+        .content-area { flex: 1; display: flex; flex-direction: column; overflow-y: auto; }
+
+        .video-wrapper {
+            width: 100%;
+            background: black;
+            aspect-ratio: 16/9;
+            position: relative;
+        }
+
+        iframe { width: 100%; height: 100%; border: none; }
+
+        .lesson-details { padding: 30px; max-width: 1000px; margin: 0 auto; width: 100%; }
+
+        .lesson-header {
+            display: flex; justify-content: space-between; align-items: flex-start;
+            margin-bottom: 20px; flex-wrap: wrap; gap: 15px;
+        }
+
+        h1.lesson-title { font-size: 1.5rem; margin-bottom: 10px; line-height: 1.4; }
+        .lesson-meta { color: var(--text-muted); font-size: 0.9rem; display: flex; gap: 15px; }
+
+        .action-buttons { display: flex; gap: 10px; }
+
+        .btn {
+            padding: 10px 20px; border-radius: 6px; border: none; cursor: pointer;
+            font-weight: 600; display: flex; align-items: center; gap: 8px; transition: 0.2s;
+        }
+        .btn-primary { background-color: var(--primary); color: white; }
+        .btn-primary:hover { background-color: var(--primary-hover); }
+        .btn-outline { background-color: transparent; border: 1px solid var(--border); color: var(--text-main); }
+        .btn-outline:hover { background-color: var(--bg-hover); }
+        .btn-complete.completed { background-color: var(--success); color: white; }
+
+        /* Tabs */
+        .tabs { display: flex; border-bottom: 1px solid var(--border); margin-bottom: 20px; }
+        .tab { padding: 12px 24px; cursor: pointer; color: var(--text-muted); border-bottom: 2px solid transparent; font-weight: 500; }
+        .tab.active { color: var(--primary); border-bottom: 2px solid var(--primary); }
+        .tab-content { display: none; line-height: 1.6; color: var(--text-muted); }
+        .tab-content.active { display: block; }
+
+        /* --- Sidebar (Right) --- */
+        .sidebar {
+            width: 350px; background-color: var(--bg-panel); border-left: 1px solid var(--border);
+            display: flex; flex-direction: column; flex-shrink: 0;
+        }
+        .sidebar-header { padding: 20px; border-bottom: 1px solid var(--border); font-weight: 600; }
+        .module-list { flex: 1; overflow-y: auto; }
+        .module { border-bottom: 1px solid var(--border); }
+        
+        .module-header {
+            padding: 15px 20px; background-color: rgba(255,255,255,0.02); cursor: pointer;
+            display: flex; justify-content: space-between; align-items: center; font-size: 0.95rem; font-weight: 600;
+        }
+        .module-header:hover { background-color: var(--bg-hover); }
+
+        .lesson-item {
+            display: flex; padding: 12px 20px 12px 15px; cursor: pointer; transition: 0.2s;
+            border-left: 3px solid transparent; align-items: flex-start; gap: 12px;
+        }
+        .lesson-item:hover { background-color: rgba(255,255,255,0.05); }
+        .lesson-item.active { background-color: rgba(59, 130, 246, 0.1); border-left-color: var(--primary); }
+        
+        .lesson-item.completed .lesson-title-text { color: var(--text-muted); text-decoration: line-through; }
+        
+        .checkbox {
+            width: 18px; height: 18px; border: 2px solid var(--text-muted); border-radius: 4px;
+            display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 2px;
+        }
+        .lesson-item.completed .checkbox { background-color: var(--success); border-color: var(--success); color: white; font-size: 12px; }
+
+        .lesson-info { flex: 1; }
+        .lesson-title-text { font-size: 0.9rem; margin-bottom: 4px; display: block; }
+        .lesson-duration { font-size: 0.75rem; color: var(--text-muted); display: flex; align-items: center; gap: 5px; }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .main-container { flex-direction: column; }
+            .sidebar { width: 100%; height: 400px; border-left: none; border-top: 1px solid var(--border); }
+            body { overflow: auto; height: auto; }
+            .content-area { overflow: visible; }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="logo-area">
+            <i class="fas fa-graduation-cap logo-icon"></i>
+            <span>MyClass <span style="font-weight:400; color:var(--text-muted); font-size: 0.9em;">Dream</span></span>
+        </div>
+        <div class="progress-container">
+            <div class="progress-text">
+                <span id="completed-count">0</span>/<span id="total-count">0</span>✅
+            </div>
+            <div class="progress-bar-bg">
+                <div class="progress-bar-fill" id="overall-progress"></div>
+            </div>
+            <i class="fas fa-trophy" style="color: gold;"></i>
+        </div>
+    </header>
+
+    <div class="main-container">
+        <div class="content-area">
+            <div class="video-wrapper">
+                <iframe id="video-player" src="" 
+                    sandbox="allow-scripts allow-same-origin allow-presentation" 
+                    allowfullscreen>
+                </iframe>
+            </div>
+
+            <div class="lesson-details">
+                <div class="lesson-header">
+                    <div>
+                        <h1 class="lesson-title" id="main-title">Loading Lesson...</h1>
+                        <div class="lesson-meta">
+                            <span id="main-instructor"><i class="fas fa-chalkboard-teacher"></i> Math & Science Nerds</span>
+                            <span id="main-views"><i class="fas fa-eye"></i> 0 views</span>
+                        </div>
+                    </div>
+                    <div class="action-buttons">
+                        <button class="btn btn-outline" onclick="previousLesson()"><i class="fas fa-chevron-left"></i> Prev</button>
+                        <button class="btn btn-primary" id="mark-complete-btn" onclick="toggleCompleteCurrent()">
+                            Mark Complete
+                        </button>
+                        <button class="btn btn-outline" onclick="nextLesson()">Next <i class="fas fa-chevron-right"></i></button>
+                    </div>
+                </div>
+
+                <div class="tabs">
+                    <div class="tab active" onclick="switchTab('overview')">Overview</div>
+                    <div class="tab" onclick="switchTab('resources')">Resources</div>
+                    <div class="tab" onclick="switchTab('notes')">My Notes</div>
+                </div>
+
+                <div id="tab-overview" class="tab-content active">
+                    <h3>About this Lesson</h3>
+                    <p class="desc-text" id="main-desc" style="margin-top: 10px;">Loading...</p>
+                </div>
+
+                <div id="tab-resources" class="tab-content">
+                    <div style="background: rgba(255,255,255,0.05); padding: 15px; border-radius: 6px;">
+                        <i class="fas fa-file-pdf" style="color: #ef4444; margin-right: 10px;"></i>
+                        <a href="#" style="color: var(--primary); text-decoration: none;">Download Lecture Slides (PDF)</a>
+                    </div>
+                </div>
+
+                <div id="tab-notes" class="tab-content">
+                    <textarea style="width: 100%; height: 150px; background: var(--bg-dark); border: 1px solid var(--border); color: white; padding: 10px; border-radius: 6px;" placeholder="Type your notes here..."></textarea>
+                </div>
+            </div>
+        </div>
+
+        <div class="sidebar">
+            <div class="sidebar-header">Course Content</div>
+            <div class="module-list" id="curriculum-container"></div>
+        </div>
+    </div>
+
+    <script>
+        // ==========================================
+        //  COURSE DATA CONFIGURATION
+        //  Add your lessons here!
+        // ==========================================
+        const courseData = {
+            title: "HSC Higher Math 1st Paper: One Shot Mastery",
+            modules: [
+                {
+                    title: "Math One Shot",
+                    lessons: [
+                        {
+    id: "KtqyZ-ANMUk",
+    title: "এক ক্লাসেই ম্যাট্রিক্স ও নির্ণায়ক ১০০% শেষ!",
+    duration: "4:06:25",
+    views: "0",
+    desc: ""
+},
+{
+    id: "-WP3xRkTuaM",
+    title: "4 ঘন্টার ১ ক্লাসেই সরলরেখা ১০০% শেষ! 🔥",
+    duration: "4:11:18",
+    views: "0",
+    desc: ""
+},
+{
+    id: "piZLlyz3wbs",
+    title: "১ ক্লাসেই ত্রিকোণমিতি ১০০% শেষ - Trigonometry | HSC",
+    duration: "3:59:59",
+    views: "0",
+    desc: ""
+},
+{
+    id: "1jjTSSpq2pQ",
+    title: "৩ ঘন্টার ১ ক্লাসেই বৃত্ত ১০০% শেষ! 🔥",
+    duration: "2:54:58",
+    views: "0",
+    desc: ""
+},
+{
+    id: "DKSpBV109fE",
+    title: "১ ক্লাসেই অন্তরীকরণ ১০০% শেষ - Differentiation | HSC",
+    duration: "5:17:00",
+    views: "0",
+    desc: ""
+},
+{
+    id: "JLuKC_yxoWs",
+    title: "১ ক্লাসেই ভেক্টর ১০০% শেষ - Vector | HSC",
+    duration: "2:42:58",
+    views: "0",
+    desc: ""
+},
+{
+    id: "yO-qpIO6rQU",
+    title: "এক ক্লাসেই জটিল সংখ্যা ১০০% কাভার - Complex Number | HSC",
+    duration: "2:51:54",
+    views: "0",
+    desc: ""
+},
+{
+    id: "KBrLO601OVU",
+    title: "২.৫ ঘণ্টায় বহুপদী ১০০% শেষ - Polynomial | HSC",
+    duration: "2:31:15",
+    views: "0",
+    desc: ""
+},
+{
+    id: "pU_iwduItHs",
+    title: "১ ক্লাসেই বিন্যাস ও সমাবেশ Basic+CQ+MCQ পূর্ণাঙ্গ প্রস্তুতি | HSC 🔥",
+    duration: "5:38:11",
+    views: "0",
+    desc: ""
+},
+{
+    id: "9pwpsJD0tL8",
+    title: "১ ক্লাসেই ত্রিকোণমিতিক অনুপাত Basic+CQ+MCQ পূর্ণাঙ্গ প্রস্তুতি | HSC 🔥",
+    duration: "2:16:36",
+    views: "0",
+    desc: ""
+},
+{
+    id: "oYeRl4OQo0Y",
+    title: "৩.৫ ঘণ্টায় ফাংশনের Basic+CQ+MCQ পূর্ণাঙ্গ প্রস্তুতি | HSC 🔥",
+    duration: "3:29:03",
+    views: "0",
+    desc: ""
+},
+{
+    id: "WXMaW-VdpzA",
+    title: "১ ক্লাসেই ইন্টিগ্রেশন ১০০% শেষ - HSC & College",
+    duration: "4:21:34",
+    views: "0",
+    desc: ""
+},
+{
+    id: "6hhbuYeI1cU",
+    title: "১ ক্লাসেই বাস্তব সংখ্যা ১০০% শেষ | HSC 🔥",
+    duration: "2:47:42",
+    views: "0",
+    desc: ""
+},
+{
+    id: "C1OAPt1Q26U",
+    title: "১ ক্লাসেই যোগাশ্রয়ী প্রোগ্রামিং ১০০% শেষ | HSC 🔥",
+    duration: "2:10:08",
+    views: "0",
+    desc: ""
+},
+{
+    id: "g4dmJ7vVY5U",
+    title: "১ ক্লাসেই দ্বিপদী বিস্তৃতি ১০০% শেষ | HSC 🔥",
+    duration: "4:59:07",
+    views: "0",
+    desc: ""
+},
+{
+    id: "-G8AOnuWUII",
+    title: "১ ক্লাসেই কনিকের (Conic) ১০০% শেষ | HSC 🔥",
+    duration: "8:14:13",
+    views: "0",
+    desc: ""
+},
+{
+    id: "e5UjvcHh87E",
+    title: "কণিক - Conics One Shot Revision Class!",
+    duration: "4:59:14",
+    views: "0",
+    desc: ""
+},
+{
+    id: "dxU1TOy9jvM",
+    title: "বিপরীত ত্রিকোণমিতি - Inverse Trigonometry Oneshot Class!",
+    duration: "2:35:05",
+    views: "0",
+    desc: ""
+},
+{
+    id: "n9kLnm_Tqg8",
+    title: "১ ক্লাসেই স্থিতিবিদ্যার ১০০% প্রস্তুতি - Statics | HSC",
+    duration: "5:05:44",
+    views: "0",
+    desc: ""
+},
+{
+    id: "K5ddkgvdVvM",
+    title: "সমতলে বস্তুকণার গতি - Dynamics Oneshot Class!",
+    duration: "4:04:59",
+    views: "0",
+    desc: ""
+},
+{
+    id: "9wdcmsJcHXI",
+    title: "১ ক্লাসেই সম্ভাবনা ১০০% শেষ | HSC 🔥",
+    duration: "3:20:04",
+    views: "0",
+    desc: ""
+},
+
+                        
+                    ]
+                    
+                },
+             
+                // --- EXAMPLE: UNCOMMENT BELOW TO ADD A NEW MODULE ---
+                /*
+                {
+                    title: "Module 3: Trigonometry",
+                    lessons: [
+                        {
+                            id: "VIDEO_ID_HERE",
+                            title: "Trigonometry Basics",
+                            duration: "1:00:00",
+                            views: "500K",
+                            desc: "Introduction to Trigonometric ratios and identities."
+                        }
+                    ]
+                }
+                */
+            ]
+        };
+
+        // ==========================================
+        //  SYSTEM LOGIC (Do not edit below)
+        // ==========================================
+        
+        let allLessons = [];
+        courseData.modules.forEach((mod, modIndex) => {
+            mod.lessons.forEach((lesson, lessIndex) => {
+                allLessons.push({
+                    ...lesson,
+                    moduleIndex: modIndex,
+                    lessonIndex: lessIndex,
+                    globalIndex: allLessons.length,
+                    completed: false
+                });
+            });
+        });
+
+        let currentLessonIndex = 0;
+
+        function initCourse() {
+            renderSidebar();
+            loadLesson(0);
+            updateProgressUI();
+        }
+
+        function renderSidebar() {
+            const container = document.getElementById('curriculum-container');
+            container.innerHTML = '';
+
+            courseData.modules.forEach((mod, mIndex) => {
+                const modHeader = document.createElement('div');
+                modHeader.className = 'module';
+                modHeader.innerHTML = `
+                    <div class="module-header">
+                        <span>${mod.title}</span>
+                        <i class="fas fa-chevron-down" style="font-size: 0.8rem;"></i>
+                    </div>
+                    <div class="lesson-list">
+                        ${mod.lessons.map((lesson) => {
+                            const globalIdx = allLessons.find(l => l.id === lesson.id).globalIndex;
+                            return `
+                                <div class="lesson-item" id="lesson-item-${globalIdx}" onclick="loadLesson(${globalIdx})">
+                                    <div class="checkbox" id="check-${globalIdx}"><i class="fas fa-check"></i></div>
+                                    <div class="lesson-info">
+                                        <span class="lesson-title-text">${lesson.title}</span>
+                                        <div class="lesson-duration"><i class="far fa-play-circle"></i> ${lesson.duration}</div>
+                                    </div>
+                                </div>
+                            `;
+                        }).join('')}
+                    </div>
+                `;
+                container.appendChild(modHeader);
+            });
+        }
+
+        function loadLesson(index) {
+            if (index < 0 || index >= allLessons.length) return;
+            currentLessonIndex = index;
+            const lesson = allLessons[index];
+
+            // Load Video with restrictions to block external redirects
+            const iframe = document.getElementById('video-player');
+            iframe.src = `https://www.youtube.com/embed/${lesson.id}?autoplay=1&modestbranding=1&rel=0&showinfo=0`;
+
+            document.getElementById('main-title').textContent = lesson.title;
+            document.getElementById('main-views').innerHTML = `<i class="fas fa-eye"></i> ${lesson.views} views`;
+            document.getElementById('main-desc').textContent = lesson.desc;
+
+            document.querySelectorAll('.lesson-item').forEach(el => el.classList.remove('active'));
+            document.getElementById(`lesson-item-${index}`).classList.add('active');
+            updateMarkCompleteButton();
+        }
+
+        function toggleCompleteCurrent() {
+            const lesson = allLessons[currentLessonIndex];
+            lesson.completed = !lesson.completed;
+            
+            const item = document.getElementById(`lesson-item-${currentLessonIndex}`);
+            if(lesson.completed) item.classList.add('completed');
+            else item.classList.remove('completed');
+
+            updateMarkCompleteButton();
+            updateProgressUI();
+        }
+
+        function updateMarkCompleteButton() {
+            const btn = document.getElementById('mark-complete-btn');
+            const isComplete = allLessons[currentLessonIndex].completed;
+            
+            if (isComplete) {
+                btn.classList.add('btn-complete', 'completed');
+                btn.innerHTML = '<i class="fas fa-check"></i> Completed';
+                btn.classList.remove('btn-primary');
+            } else {
+                btn.classList.remove('btn-complete', 'completed');
+                btn.classList.add('btn-primary');
+                btn.textContent = 'Mark Complete';
+            }
+        }
+
+        function updateProgressUI() {
+            const completedCount = allLessons.filter(l => l.completed).length;
+            const total = allLessons.length;
+            const percentage = total === 0 ? 0 : (completedCount / total) * 100;
+
+            document.getElementById('completed-count').textContent = completedCount;
+            document.getElementById('total-count').textContent = total;
+            document.getElementById('overall-progress').style.width = `${percentage}%`;
+        }
+
+        function nextLesson() { if (currentLessonIndex < allLessons.length - 1) loadLesson(currentLessonIndex + 1); }
+        function previousLesson() { if (currentLessonIndex > 0) loadLesson(currentLessonIndex - 1); }
+
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.tab').forEach(el => el.classList.remove('active'));
+            document.getElementById(`tab-${tabName}`).classList.add('active');
+            
+            const tabs = document.querySelectorAll('.tab');
+            if(tabName === 'overview') tabs[0].classList.add('active');
+            if(tabName === 'resources') tabs[1].classList.add('active');
+            if(tabName === 'notes') tabs[2].classList.add('active');
+        }
+
+        initCourse();
+    </script>
+</body>
+</html>
+
